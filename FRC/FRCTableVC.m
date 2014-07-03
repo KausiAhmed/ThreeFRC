@@ -385,7 +385,7 @@
         if (self.numberOfSectionsInTV == 1)
         {
             self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
-            NSLog(@"self.numberOfSectionsInTV == 1: %i", self.numberOfSectionsInTV);
+            NSLog(@"self.numberOfSectionsInTV old == 1: New: %i", self.numberOfSectionsInTV);
         }
     }
     else if (controller == self.sectionPastFRC)
@@ -393,7 +393,7 @@
         if (self.numberOfSectionsInTV == 2)
         {
             self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
-            NSLog(@"self.numberOfSectionsInTV == 2: %i", self.numberOfSectionsInTV);
+            NSLog(@"self.numberOfSectionsInTV old == 2: New: %i", self.numberOfSectionsInTV);
 
         }
     }
@@ -420,23 +420,11 @@
             }
             else if (controller == self.sectionUpcomingFRC)
             {
-//                if (self.numberOfSectionsInTV == 0)
-//                {
-//                    self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
-//                }
                 modifiedIndexPath = [NSIndexPath indexPathForRow:newIndexPath.row inSection:1];
-
-
             }
             else if (controller == self.sectionPastFRC)
             {
-//                if (self.numberOfSectionsInTV == 0)
-//                {
-//                    self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
-//                }
                 modifiedIndexPath = [NSIndexPath indexPathForRow:newIndexPath.row inSection:2];
-
-
             }
 
            [self.tableView insertRowsAtIndexPaths:@[modifiedIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
