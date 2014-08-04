@@ -67,9 +67,24 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-	NSLog(@"numberOfSectionsInTableView: %i", self.numberOfSectionsInTV);
+    self.numberOfSectionsInTV =0;
+    if (([[self.sectionTodayFRC fetchedObjects]count]>0) && ([[self.sectionUpcomingFRC fetchedObjects]count]>0) && ([[self.sectionPastFRC fetchedObjects]count]>0))
+    {
+        self.numberOfSectionsInTV = 3;
+    }
+    else if ((([[self.sectionTodayFRC fetchedObjects]count]>0) && ([[self.sectionUpcomingFRC fetchedObjects]count]>0) && ([[self.sectionPastFRC fetchedObjects]count]== 0)) ||
+             (([[self.sectionTodayFRC fetchedObjects]count]>0) && ([[self.sectionUpcomingFRC fetchedObjects]count]==0) && ([[self.sectionPastFRC fetchedObjects]count]> 0)) ||
+             (([[self.sectionTodayFRC fetchedObjects]count]==0) && ([[self.sectionUpcomingFRC  fetchedObjects]count]>0) && ([[self.sectionUpcomingFRC fetchedObjects]count]>0)))
+    {
+         self.numberOfSectionsInTV = 2;
+    }
+    else if ((([[self.sectionTodayFRC fetchedObjects]count]>0) && ([[self.sectionUpcomingFRC fetchedObjects]count]==0) && ([[self.sectionPastFRC fetchedObjects]count]== 0)) ||
+             (([[self.sectionTodayFRC fetchedObjects]count]==0) && ([[self.sectionUpcomingFRC fetchedObjects]count]==0) && ([[self.sectionPastFRC fetchedObjects]count]> 0)) ||
+             (([[self.sectionTodayFRC fetchedObjects]count]==0) && ([[self.sectionUpcomingFRC  fetchedObjects]count]>0) && ([[self.sectionUpcomingFRC fetchedObjects]count]==0)))
+    {
+       self.numberOfSectionsInTV = 1;
+    }
     return self.numberOfSectionsInTV;
-    
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -119,7 +134,10 @@
     NSLog(@"Section Number: %i Number Of Rows: %i", section,rows);
     return rows;
 }
-
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSLog (@"inside commiting changesyes");
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -374,39 +392,34 @@
     }
     BOOL save = [self.managedObjectContext save:nil];
     if (!save) NSLog(@"There was an Error saving to Core Data in RootVC");
+    if (save) NSLog(@"New Datasaved");
+
 }
 
 #pragma mark - NSFetchedControllerDelegate
 
 - (void)controllerWillChangeContent:(NSFetchedResultsController *)controller {
-    NSLog(@"self.numberOfSectionsInTV before change %i", self.numberOfSectionsInTV);
-    if (controller == self.sectionUpcomingFRC)
-    {
-        if (self.numberOfSectionsInTV == 1)
-        {
-            self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
-            NSLog(@"self.numberOfSectionsInTV old == 1: New: %i", self.numberOfSectionsInTV);
-        }
-    }
-    else if (controller == self.sectionPastFRC)
-    {
-        if (self.numberOfSectionsInTV == 2)
-        {
-            self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
-            NSLog(@"self.numberOfSectionsInTV old == 2: New: %i", self.numberOfSectionsInTV);
+    NSLog(@"controllerWillChangeContent: self.numberOfSectionsInTV before change %i", self.numberOfSectionsInTV);
+    NSLog(@"Controller %@", controller);
+    NSLog(@"todayFRC %@", self.sectionTodayFRC);
+    NSLog(@"UpcomingFRC %@", self.sectionUpcomingFRC);
+    NSLog(@"PastFRC %@", self.sectionPastFRC);
 
-        }
-    }
-    
     [self.tableView beginUpdates];
+
+
 }
 
+
+
 - (void)controllerDidChangeContent:(NSFetchedResultsController *)controller {
+    NSLog(@"Inside controllerDidChangeContent:");
+
     [self.tableView endUpdates];
-    [self.tableView reloadData];
 }
 
 - (void)controller:(NSFetchedResultsController *)controller didChangeObject:(id)anObject atIndexPath:(NSIndexPath *)indexPath forChangeType:(NSFetchedResultsChangeType)type newIndexPath:(NSIndexPath *)newIndexPath {
+    NSLog(@"Inside didChangeObject:");
     
     NSIndexPath *modifiedIndexPath;
     switch(type) {
@@ -420,17 +433,30 @@
             }
             else if (controller == self.sectionUpcomingFRC)
             {
+                if (self.numberOfSectionsInTV == 1)
+                {
+                    [self.tableView insertSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationTop];
+
+                    NSLog(@"||self.numberOfSectionsInTV old == 1: New: %i", self.numberOfSectionsInTV);
+                }
                 modifiedIndexPath = [NSIndexPath indexPathForRow:newIndexPath.row inSection:1];
             }
             else if (controller == self.sectionPastFRC)
             {
+                if (self.numberOfSectionsInTV == 2)
+                {
+                    [self.tableView insertSections:[NSIndexSet indexSetWithIndex:2] withRowAnimation:UITableViewRowAnimationTop];
+                    NSLog(@"|||self.numberOfSectionsInTV old == 2: New: %i", self.numberOfSectionsInTV);
+                    
+                }
                 modifiedIndexPath = [NSIndexPath indexPathForRow:newIndexPath.row inSection:2];
             }
+        }
 
            [self.tableView insertRowsAtIndexPaths:@[modifiedIndexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
 
             break;
-        }
+        
         case NSFetchedResultsChangeDelete:
             NSLog(@"frcChangeDelete");
             if (controller == self.sectionTodayFRC)
@@ -478,6 +504,7 @@
     
 }
 
+//Since section for all three FRC's is 0 and never changes, this delegate is not called
 - (void)controller:(NSFetchedResultsController *)controller didChangeSection:(id <NSFetchedResultsSectionInfo>)sectionInfo atIndex:(NSUInteger)sectionIndex forChangeType:(NSFetchedResultsChangeType)type {
     
     switch(type) {
