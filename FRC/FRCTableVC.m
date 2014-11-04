@@ -370,8 +370,7 @@
         startDate = [cal dateByAddingComponents:components toDate:today options:0];
         meeting.startDate = startDate;
         meeting.title = [formatter stringFromDate:startDate];
-//        NSLog(@"Meeting.StartDate: %@", meeting.startDate);
-//        NSLog(@"Meeting.Title: %@", meeting.title);
+
     }
     BOOL save = [self.managedObjectContext save:nil];
     if (!save) NSLog(@"There was an Error saving to Core Data in RootVC");
@@ -380,6 +379,25 @@
 #pragma mark - NSFetchedControllerDelegate
 
 - (void)controllerWillChangeContent:(NSFetchedResultsController *)controller {
+    NSLog(@"self.numberOfSectionsInTV before change %i", self.numberOfSectionsInTV);
+    if (controller == self.sectionUpcomingFRC)
+    {
+        if (self.numberOfSectionsInTV == 1)
+        {
+            self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
+            NSLog(@"self.numberOfSectionsInTV == 1: %i", self.numberOfSectionsInTV);
+        }
+    }
+    else if (controller == self.sectionPastFRC)
+    {
+        if (self.numberOfSectionsInTV == 2)
+        {
+            self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
+            NSLog(@"self.numberOfSectionsInTV == 2: %i", self.numberOfSectionsInTV);
+
+        }
+    }
+    
     [self.tableView beginUpdates];
 }
 
@@ -402,12 +420,22 @@
             }
             else if (controller == self.sectionUpcomingFRC)
             {
+//                if (self.numberOfSectionsInTV == 0)
+//                {
+//                    self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
+//                }
                 modifiedIndexPath = [NSIndexPath indexPathForRow:newIndexPath.row inSection:1];
+
 
             }
             else if (controller == self.sectionPastFRC)
             {
+//                if (self.numberOfSectionsInTV == 0)
+//                {
+//                    self.numberOfSectionsInTV = self.numberOfSectionsInTV + 1;
+//                }
                 modifiedIndexPath = [NSIndexPath indexPathForRow:newIndexPath.row inSection:2];
+
 
             }
 
